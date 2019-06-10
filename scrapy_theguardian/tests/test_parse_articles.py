@@ -43,6 +43,50 @@ class TestArticlesSpider(unittest.TestCase):
             'author': 'Author Name',
             'keywords': ['a','b','c']
         })
+    
+    def test_parse_article_type_2(self):
+        articles_spider = ArticlesSpider()
+        url = 'http://testurl.com'
+        res = HtmlResponse(url=url, encoding='utf-8', body='<html><body><header><meta name="keywords" content="a,b,c"></header>\
+            <h1 class="content__headline content__headline--splash " articleprop="headline"> \
+            Title Parsed \
+            </h1>\
+            <span itemscope="" itemtype="http://schema.org/Person" itemprop="author">\
+            <a rel="author" class="tone-colour" itemprop="sameAs" data-link-name="auto tag link" href="https://www.theguardian.com/profile/samuel-gibbs">\
+            <span itemprop="name">Author Name</span></a></span>\
+            <meta itemprop="description" content="description details">\
+            <div itemprop="articleBody"><p>body 1</p><p>body 2</p></div></body></html>')
+        ret = [x for x in articles_spider.parse_article_content(res)]
+        self.assertEqual(len(ret), 1)
+        self.assertEqual(ret[0], {
+            'headline': 'Title Parsed',
+            'description': 'description details',
+            'body': 'body 1\nbody 2',
+            'url': url,
+            'author': 'Author Name',
+            'keywords': ['a','b','c']
+        })
+    
+    def test_parse_article_type_3(self):
+        articles_spider = ArticlesSpider()
+        url = 'http://testurl.com'
+        res = HtmlResponse(url=url, encoding='utf-8', body='<html><body><header><meta name="keywords" content="a,b,c"></header>\
+            <h1 class="content__headline" itemprop="headline">\
+            <span class="content__headline--interview-wrapper">Title Parsed</span> \
+            </h1>\
+            <p class="byline" data-link-name="byline" data-component="meta-byline">Agency Name</p>\
+            <meta itemprop="description" content="description details">\
+            <div itemprop="articleBody"><p>body 1</p><p>body 2</p></div></body></html>')
+        ret = [x for x in articles_spider.parse_article_content(res)]
+        self.assertEqual(len(ret), 1)
+        self.assertEqual(ret[0], {
+            'headline': 'Title Parsed',
+            'description': 'description details',
+            'body': 'body 1\nbody 2',
+            'url': url,
+            'author': 'Agency Name',
+            'keywords': ['a','b','c']
+        })
 
     def test_parse_article_no_description(self):
         articles_spider = ArticlesSpider()

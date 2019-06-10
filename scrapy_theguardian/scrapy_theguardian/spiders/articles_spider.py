@@ -1,6 +1,6 @@
 import scrapy
 
-MAX_PAGE_REQUESTS = 5
+MAX_PAGE_REQUESTS = 6
 
 class ArticlesSpider(scrapy.Spider):
     name = "articles"
@@ -24,10 +24,10 @@ class ArticlesSpider(scrapy.Spider):
 
     def parse_article_content(self, response):
         yield {
-            'headline': (response.css('h1[itemprop="headline"]::text').get() or '').strip(),
+            'headline': (response.css('h1[itemprop="headline"], h1[articleprop="headline"]').xpath('string(.)').get() or '').strip(),
             'description': (response.css('meta[itemprop="description"]::attr(content)').get() or '').strip(),
             'body': self.parse_article_body(response.css('div[itemprop="articleBody"] > p')),
             'url': response.url,
-            'author': (response.css('span[itemprop="author"] span[itemprop="name"]::text').get() or '').strip(),
+            'author': (response.css('span[itemprop="author"] span[itemprop="name"], p[data-link-name="byline"]').xpath('string(.)').get() or '').strip(),
             'keywords': (response.css('meta[name="keywords"]::attr(content)').get() or '').split(","),
         }
