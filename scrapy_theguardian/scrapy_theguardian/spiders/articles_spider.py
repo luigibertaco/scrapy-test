@@ -1,6 +1,6 @@
 import scrapy
 
-MAX_PAGE_REQUESTS = 2
+MAX_PAGE_REQUESTS = 5
 
 class ArticlesSpider(scrapy.Spider):
     name = "articles"
