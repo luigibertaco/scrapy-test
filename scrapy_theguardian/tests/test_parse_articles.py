@@ -1,5 +1,6 @@
 import unittest
 from scrapy.http import HtmlResponse
+from scrapy.selector import Selector
 from scrapy_theguardian.spiders.articles_spider import ArticlesSpider
 
 class TestArticlesSpider(unittest.TestCase):
@@ -14,14 +15,23 @@ class TestArticlesSpider(unittest.TestCase):
 
     def test_parse_article(self):
         articles_spider = ArticlesSpider()
-        res = HtmlResponse(url='', encoding='utf-8', body='<html><body><h1 class="content__headline content__headline--no-margin-bottom" itemprop="headline">\
+        url = 'http://testurl.com'
+        res = HtmlResponse(url=url, encoding='utf-8', body='<html><body><h1 class="content__headline content__headline--no-margin-bottom" itemprop="headline">\
 Title Parsed\
-</h1></body></html>')
+</h1><meta itemprop="description" content="description details"><div itemprop="articleBody"><p>body 1</p><p>body 2</p></div></body></html>')
         ret = [x for x in articles_spider.parse_article_content(res)]
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0], {
             'headline': 'Title Parsed',
+            'description': 'description details',
+            'body': 'body 1\nbody 2',
+            'url': url
         })
+    
+    def test_parse_article_body(self):
+        articles_spider = ArticlesSpider()
+        selector = Selector(text='<html><body><p>first</p><p>2-<a href="#">Second</a>-2</p><p>3rd</p></body></html>').css("p")
+        self.assertEqual(articles_spider.parse_article_body(selector), 'first\n2-Second-2\n3rd')
 
 if __name__ == '__main__':
     unittest.main()
