@@ -13,12 +13,13 @@ class ArticlesSpider(scrapy.Spider):
             yield scrapy.Request(url=article_link, callback=self.parse_article_content)
     
     def parse_article_body(self, selector):
-        return '\n'.join(["".join(x.css("::text").getall()).rstrip() for x in selector])
+        return '\n'.join(["".join(x.css("::text").getall()).strip() for x in selector])
 
     def parse_article_content(self, response):
         yield {
-            'headline': response.css('h1[itemprop="headline"]::text').get().rstrip(),
-            'description': response.css('meta[itemprop="description"]::attr(content)').get().rstrip(),
+            'headline': response.css('h1[itemprop="headline"]::text').get().strip(),
+            'description': response.css('meta[itemprop="description"]::attr(content)').get().strip(),
             'body': self.parse_article_body(response.css('div[itemprop="articleBody"] > p')),
-            'url': response.url
+            'url': response.url,
+            'author': response.css('span[itemprop="author"] span[itemprop="name"]::text').get().strip(),
         }

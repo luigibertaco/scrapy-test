@@ -16,16 +16,21 @@ class TestArticlesSpider(unittest.TestCase):
     def test_parse_article(self):
         articles_spider = ArticlesSpider()
         url = 'http://testurl.com'
-        res = HtmlResponse(url=url, encoding='utf-8', body='<html><body><h1 class="content__headline content__headline--no-margin-bottom" itemprop="headline">\
-Title Parsed\
-</h1><meta itemprop="description" content="description details"><div itemprop="articleBody"><p>body 1</p><p>body 2</p></div></body></html>')
+        res = HtmlResponse(url=url, encoding='utf-8', body='<html><body>\
+            <h1 class="content__headline content__headline--no-margin-bottom" itemprop="headline">\
+            Title Parsed\
+            </h1><span itemprop="author"> \
+            <a><span itemprop="name">Author Name</span></a></span>\
+            <meta itemprop="description" content="description details">\
+            <div itemprop="articleBody"><p>body 1</p><p>body 2</p></div></body></html>')
         ret = [x for x in articles_spider.parse_article_content(res)]
         self.assertEqual(len(ret), 1)
         self.assertEqual(ret[0], {
             'headline': 'Title Parsed',
             'description': 'description details',
             'body': 'body 1\nbody 2',
-            'url': url
+            'url': url,
+            'author': 'Author Name',
         })
     
     def test_parse_article_body(self):
